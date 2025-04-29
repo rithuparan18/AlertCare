@@ -29,27 +29,6 @@ Kotlin (mobile frontend)
 
 C++ (firmware for sensor data acquisition)
 
-🚀 Getting Started
-Clone this repository:
-
-bash
-Copy
-Edit
-git clone https://github.com/your-username/AlertCare.git
-Navigate into the project folders:
-
-/firmware: ESP32 sensor and ML integration code
-
-/mobile-app: Android app for real-time dashboard and alerts
-
-/models: Trained ML models and preprocessing scripts
-
-Upload firmware to ESP32-S3 using Arduino IDE or PlatformIO
-
-Launch the Android app in emulator or physical device
-
-Link to Firebase project via the google-services.json file
-
 📸 Screenshots
 Splash screen with branding
 
