@@ -1,0 +1,202 @@
+package com.example.alertapplication
+
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.alertapplication.ui.theme.AlertApplicationTheme
+import kotlinx.coroutines.delay
+import kotlin.random.Random
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContent {
+            AlertApplicationTheme {
+                AppNavigation()
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "splash") {
+        composable("splash") { SplashScreen(navController) }
+        composable("setup") { SetupScreen(navController) }
+        composable("connect") { ConnectSystemScreen(navController) }
+        composable("dashboard") { DashboardScreen(navController) }
+        composable("past_logs") { PastLogsScreen(navController) }
+
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SplashScreen(navController: androidx.navigation.NavController) {
+    LaunchedEffect(Unit) {
+        delay(2000)
+        navController.navigate("setup")
+    }
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Image(painter = painterResource(id = R.drawable.logo), contentDescription = "App Logo")
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SetupScreen(navController: androidx.navigation.NavController) {
+    var name by remember { mutableStateOf("") }
+    var age by remember { mutableStateOf("") }
+    var medicalHistory by remember { mutableStateOf("") }
+
+    Scaffold(topBar = { TopAppBar(title = { Text("Setup User Profile") }) }) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Name") })
+            OutlinedTextField(value = age, onValueChange = { age = it }, label = { Text("Age") })
+            OutlinedTextField(value = medicalHistory, onValueChange = { medicalHistory = it }, label = { Text("Medical History") })
+            Spacer(modifier = Modifier.height(20.dp))
+            Button(onClick = { navController.navigate("connect") }) {
+                Text("Save & Connect System")
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ConnectSystemScreen(navController: androidx.navigation.NavController) {
+    var isConnected by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        delay(3000)
+        isConnected = true
+    }
+
+    Scaffold(topBar = { TopAppBar(title = { Text("Connecting to System") }) }) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("AlertCare – Smart Monitoring, Instant Alerts, Better Health.", style = MaterialTheme.typography.bodyLarge)
+                Spacer(modifier = Modifier.height(20.dp))
+                if (isConnected) {
+                    Button(onClick = { navController.navigate("dashboard") }) {
+                        Text("Go to Dashboard")
+                    }
+                } else {
+                    CircularProgressIndicator()
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DashboardScreen(navController: androidx.navigation.NavController) {
+    val context = LocalContext.current
+
+    // State variables for sensor data
+    var spO2 by remember { mutableStateOf(98) }
+    var glucose by remember { mutableStateOf(110) }
+    var temperature by remember { mutableStateOf(98.6) }
+    var heartbeat by remember { mutableStateOf(72) }
+
+    // Simulate real-time sensor updates
+    LaunchedEffect(Unit) {
+        while (true) {
+            spO2 = Random.nextInt(90, 101) // Correct usage
+            glucose = Random.nextInt(70, 151)
+            temperature = Random.nextDouble(97.0, 100.0)
+            heartbeat = Random.nextInt(60, 101)
+            delay(2000) // Update every 2 seconds
+        }
+    }
+
+    Scaffold(topBar = { TopAppBar(title = { Text("Health Dashboard") }) }) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("Live Sensor Data", style = MaterialTheme.typography.headlineSmall)
+            Spacer(modifier = Modifier.height(20.dp))
+            Text("SpO2: $spO2%")
+            Text("Glucose: $glucose mg/dL")
+            Text("Temperature: $temperature°F")
+            Text("Heartbeat: $heartbeat BPM")
+            Spacer(modifier = Modifier.height(20.dp))
+            Button(onClick = { navController.navigate("past_logs") }) {
+                Text("See Past Logs")
+            }
+            Button(onClick = {
+                val intent = Intent(Intent.ACTION_DIAL).apply {
+                    data = Uri.parse("tel:108")
+                }
+                context.startActivity(intent)
+            }) {
+                Text("Call for Medical Help")
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PastLogsScreen(navController: androidx.navigation.NavController) {
+    Scaffold(topBar = { TopAppBar(title = { Text("Past Medical Logs") }) }) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp)
+        ) {
+            Text("Previous Vital Spikes", style = MaterialTheme.typography.headlineSmall)
+            Spacer(modifier = Modifier.height(10.dp))
+            Text("- High Glucose Level: 180 mg/dL on Jan 15")
+            Text("- Low Oxygen Level: 88% on Feb 10")
+            Text("- Elevated Temperature: 102°F on Mar 5")
+            Spacer(modifier = Modifier.height(20.dp))
+            Button(onClick = { navController.navigate("dashboard") }) {
+                Text("Go to Dashboard")
+            }
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewApp() {
+    AlertApplicationTheme {
+        AppNavigation()
+    }
+}
